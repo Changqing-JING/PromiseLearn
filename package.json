@@ -1,0 +1,23 @@
+{
+  "name": "promise-learn",
+  "version": "1.0.0",
+  "description": "A TypeScript demo project with ES Modules",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "keywords": [
+    "typescript",
+    "demo",
+    "esm"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.8.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}
