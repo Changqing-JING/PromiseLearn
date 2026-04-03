@@ -8,7 +8,7 @@ class C4 {
 function awaiter2(fnc:(value:Object|null) => AsPromise<Object|null>|null): AsPromise<Object|null>{
 
     function drive(value:Object|null): AsPromise<Object|null>{
-         let promise = fnc(value);
+         let promise: AsPromise<Object | null> | null = fnc(value);
 
          if(promise != null){
             return promise.then(drive);
@@ -22,12 +22,22 @@ function awaiter2(fnc:(value:Object|null) => AsPromise<Object|null>|null): AsPro
 
 
 
-function delay4(ms: number): AsPromise<string> {
-    return new AsPromise((resolve) => setTimeout(() => {
-        console.log(`delay4 timeout`);
+function api1(ms: number): AsPromise<string> {
+    return new AsPromise<string>((resolve) => setTimeout(() => {
+        console.log(`api1 timeout`);
         resolve(`waited ${ms}ms`)
     }, ms));
 }
+
+function api2(ms: number): AsPromise<C4> {
+    return new AsPromise<C4>((resolve) => setTimeout(() => {
+        console.log(`api2 timeout`);
+        let c4 = new C4();
+        c4.a = "abc";
+        resolve(c4);
+    }, ms));
+}
+
 
 
 function main5(){
@@ -41,15 +51,15 @@ function main5(){
                 c4 = new C4();
                 console.log(`start`);
                 label = 1;
-                return (delay4(1) as unknown as AsPromise<Object|null>);
+                return (api1(1) as unknown as AsPromise<Object|null>);
             case 1:
                 const result = value as string;
                 console.log(`continue: ${c4.a} ${result}`);
                 label = 2;
-                return (delay4(2) as unknown as AsPromise<Object|null>);
+                return (api2(2) as unknown as AsPromise<Object|null>);
             case 2:
-                const result2 = value as string;
-                console.log(`continue: ${c4.a} ${result2}`);
+                const result2 = value as C4;
+                console.log(`continue: ${c4.a} ${result2.a}`);
                 label = 3;
                 return null;
         }
