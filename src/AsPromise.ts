@@ -1,9 +1,9 @@
-export class AsPromise<T> {
-    private onThen: ((value:T) => void)|null = null;
+export class AsPromiseBase {
+    private onThen: ((value:Object|null) => void)|null = null;
     private resolved: boolean = false;
-    private resolvedValue: T|null = null;
-    constructor(fnc: (resolve:(value:T)=>void, reject:(reason:any)=>void)=>void){
-        let resolve = (value:T) => {
+    private resolvedValue: Object|null = null;
+    constructor(fnc: (resolve:(value:Object|null)=>void, reject:(reason:any)=>void)=>void){
+        let resolve = (value:Object|null) => {
             this.resolved = true;
             this.resolvedValue = value;
             if(this.onThen){
@@ -17,31 +17,47 @@ export class AsPromise<T> {
         fnc(resolve, reject);
     }
 
-    then<U>(onFulfilled:(value:T)=>Object|null): AsPromise<U> {
-         return new AsPromise<U>((resolve:(value:U)=>void, reject) => {
-        this.onThen = (value: T) => {
+    thenBase(onFulfilled:(value:Object|null)=>Object|null): AsPromiseBase {
+         return new AsPromiseBase((resolve:(value:Object|null)=>void, reject) => {
+        this.onThen = (value: Object|null) => {
             const result = onFulfilled(value);
-            if (result instanceof AsPromise) {
-                (result as AsPromise<U>).then<U>((v: U): (Object|null) => {
-                    resolve(v as U);
+            if (result instanceof AsPromiseBase) {
+                (result as AsPromiseBase).thenBase((v: Object|null): (Object|null) => {
+                    resolve(v);
                     return null;
                 });
             } else {
                 //returns a value, resolve it
-                resolve(result as U);
+                resolve(result);
             }
         };
         if(this.resolved){
-            this.onThen(this.resolvedValue as T);
+            this.onThen(this.resolvedValue);
         }
     });
     }
 
-    static resolve<T>(value: T): AsPromise<T> {
-        return new AsPromise<T>((resolve:(value:T)=>void, reject) => {
+    static resolve(value: Object|null): AsPromiseBase {
+        return new AsPromiseBase((resolve:(value:Object|null)=>void, reject) => {
             resolve(value);
         });
     }
     
 }
 
+
+export class AsPromise<T> extends AsPromiseBase {
+    
+    then<U>(onFulfilled:(value:T|null)=>Object|null): AsPromise<U> {
+        let onFulfilledWrapper = (value:Object|null): Object|null => {
+            return onFulfilled(value as T|null);
+        };
+        let p:AsPromiseBase =  super.thenBase(onFulfilledWrapper);
+        return new AsPromise<U>((resolve:(value:Object|null)=>void, reject) => {
+            p.thenBase((value:Object|null): Object|null => {
+                resolve(value);
+                return null;
+            });
+        });
+    }
+}

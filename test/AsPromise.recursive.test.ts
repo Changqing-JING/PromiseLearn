@@ -1,19 +1,21 @@
-import { AsPromise } from "../src/AsPromise";
+import { AsPromiseBase, AsPromise } from "../src/AsPromise";
 
 class C4 {
     a:string = "hello";
 }
 
 
-function awaiter2(fnc:(value:Object|null) => AsPromise<Object|null>|null): AsPromise<Object|null>{
+function awaiter2(fnc:(value:Object|null) => AsPromiseBase|null): AsPromiseBase{
 
-    function drive(value:Object|null): AsPromise<Object|null>{
-         let promise: AsPromise<Object | null> | null = fnc(value);
+     function drive(value:Object|null): AsPromiseBase{
+        let promise: AsPromiseBase | null = fnc(value);
 
          if(promise != null){
-            return promise.then(drive);
+                return promise.thenBase(drive);
          }else{
-            return AsPromise.resolve<Object|null>(null);
+                return new AsPromiseBase((resolve, reject) => {
+                     resolve(null);
+                });
          }
     }
     
@@ -45,18 +47,18 @@ function main5(){
     let label:number = 0;
     let c4: C4;
 
-    function inner(value:Object|null): AsPromise<Object|null>|null{
+    function inner(value:Object|null): AsPromiseBase|null{
         switch(label){
             case 0:
                 c4 = new C4();
                 console.log(`start`);
                 label = 1;
-                return (api1(1) as unknown as AsPromise<Object|null>);
+                return (api1(1) as AsPromiseBase);
             case 1:
                 const result = value as string;
                 console.log(`continue: ${c4.a} ${result}`);
                 label = 2;
-                return (api2(2) as unknown as AsPromise<Object|null>);
+                return (api2(2) as AsPromiseBase);
             case 2:
                 const result2 = value as C4;
                 console.log(`continue: ${c4.a} ${result2.a}`);
@@ -71,7 +73,7 @@ function main5(){
 }
 
 let promise5 = main5();
-promise5.then((v:Object|null):Object|null => 
+promise5.thenBase((v:Object|null):Object|null => 
    { 
     console.log("done");
     return null;

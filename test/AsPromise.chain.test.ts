@@ -22,8 +22,9 @@ function main3() {
             resolve(c4);
         }, 100);
     });
-    }).then<Object>((value:C4) => {
-        console.log(`then triggered2: ${value.a}`);
+     })
+     .then<Object>((value:C4|null) => {
+        console.log(`then triggered2: ${value!.a}`);
         return null;
     });
 }
