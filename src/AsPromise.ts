@@ -60,4 +60,20 @@ export class AsPromise<T> extends AsPromiseBase {
             });
         });
     }
+
+    static all(promiseArr: AsPromiseBase[]): AsPromiseBase {
+
+        return new AsPromiseBase((resolve, reject) => {
+            let  counter = 0;
+            for(let i = 0; i < promiseArr.length; i++){
+                promiseArr[i].thenBase((value:Object|null):Object|null => {
+                    counter++;
+                    if(counter == promiseArr.length){
+                        resolve(null);
+                    }
+                    return null;
+                });
+            }
+        });
+    }
 }
