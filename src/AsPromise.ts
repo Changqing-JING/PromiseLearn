@@ -2,8 +2,8 @@ export class AsPromiseBase {
     private onThen: ((value:Object|null) => void)|null = null;
     private resolved: boolean = false;
     private resolvedValue: Object|null = null;
-    constructor(fnc: (resolve:(value:Object|null)=>void, reject:(reason:any)=>void)=>void){
-        let resolve = (value:Object|null) => {
+    constructor(fnc: (resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void)=>void){
+        let resolve = (value:Object|null):void => {
             this.resolved = true;
             this.resolvedValue = value;
             if(this.onThen){
@@ -11,14 +11,14 @@ export class AsPromiseBase {
             }
         };
 
-        let reject = (reason:any) => {
+        let reject = (reason:Object|null):void => {
         };
 
         fnc(resolve, reject);
     }
 
     thenBase(onFulfilled:(value:Object|null)=>Object|null): AsPromiseBase {
-         return new AsPromiseBase((resolve:(value:Object|null)=>void, reject) => {
+         return new AsPromiseBase((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
         this.onThen = (value: Object|null) => {
             const result = onFulfilled(value);
             if (result instanceof AsPromiseBase) {
@@ -38,7 +38,7 @@ export class AsPromiseBase {
     }
 
     static resolve(value: Object|null): AsPromiseBase {
-        return new AsPromiseBase((resolve:(value:Object|null)=>void, reject) => {
+        return new AsPromiseBase((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
             resolve(value);
         });
     }
@@ -53,7 +53,7 @@ export class AsPromise<T> extends AsPromiseBase {
             return onFulfilled(value as T|null);
         };
         let p:AsPromiseBase =  super.thenBase(onFulfilledWrapper);
-        return new AsPromise<U>((resolve:(value:Object|null)=>void, reject) => {
+        return new AsPromise<U>((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
             p.thenBase((value:Object|null): Object|null => {
                 resolve(value);
                 return null;
@@ -61,15 +61,17 @@ export class AsPromise<T> extends AsPromiseBase {
         });
     }
 
-    static all(promiseArr: AsPromiseBase[]): AsPromiseBase {
+    static all(promiseArr: AsPromiseBase[]): AsPromise<(Object|null)[]> {
 
-        return new AsPromiseBase((resolve, reject) => {
+        return new AsPromise<(Object|null)[]> ((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
             let  counter = 0;
+            let values: (Object|null)[] = new Array<(Object|null)>();
             for(let i = 0; i < promiseArr.length; i++){
                 promiseArr[i].thenBase((value:Object|null):Object|null => {
+                    values.push(value);
                     counter++;
                     if(counter == promiseArr.length){
-                        resolve(null);
+                        resolve(values);
                     }
                     return null;
                 });

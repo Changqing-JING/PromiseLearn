@@ -1,22 +1,25 @@
 import { AsPromise } from "../src/AsPromise";
 
+let setTimeout_wrapper = setTimeout;
+let trace = console.log;
+
 class C4 {
     a:string = "hello";
 }
 
 
-function main3() {
-  new AsPromise<string>((resolve:(value:string)=>void,rejects) => {
-  setTimeout(() => {
-    console.log("timeout 1");
+function main3():void {
+  new AsPromise<string>((resolve:(value:Object|null)=>void,reject:(reason:Object|null)=>void) => {
+  setTimeout_wrapper(() => {
+    trace("timeout 1");
     resolve("resolve 1");
   }, 100);
   
     }).then<C4>((value) => {
-    console.log(`then triggered1: ${value}`);
-    return new AsPromise<C4>((resolve:(value:C4)=>void, reject) => {
-        setTimeout(() => {
-            console.log("timeout 2");
+    trace(`then triggered1: ${value}`);
+    return new AsPromise<C4>((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
+        setTimeout_wrapper(() => {
+            trace("timeout 2");
             let c4 = new C4();
             c4.a = "c4";
             resolve(c4);
@@ -24,7 +27,7 @@ function main3() {
     });
      })
      .then<Object>((value:C4|null) => {
-        console.log(`then triggered2: ${value!.a}`);
+        trace(`then triggered2: ${value!.a}`);
         return null;
     });
 }
