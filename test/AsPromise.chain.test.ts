@@ -15,7 +15,7 @@ function main3():void {
     resolve("resolve 1");
   }, 100);
   
-    }).then<C4>((value) => {
+    }).then<C4>((value:string|null) => {
     trace(`then triggered1: ${value}`);
     return new AsPromise<C4>((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
         setTimeout_wrapper(() => {
