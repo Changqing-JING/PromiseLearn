@@ -1,4 +1,4 @@
-import { AsPromiseBase, AsPromise } from "../src/AsPromise";
+import { _AsPromiseBase, AsPromise } from "../src/AsPromise";
 
 let trace = console.log;
 let setTimeout_wrapper = setTimeout;
@@ -9,15 +9,15 @@ class C4 {
 }
 
 
-function awaiter2(fnc:(value:Object|null) => AsPromiseBase|null): AsPromiseBase{
-    let drive: (value:Object|null) => AsPromiseBase;
-    drive = (value:Object|null): AsPromiseBase => {
-        let promise: AsPromiseBase | null = fnc(value);
+function awaiter2(fnc:(value:Object|null) => _AsPromiseBase|null): _AsPromiseBase{
+    let drive: (value:Object|null) => _AsPromiseBase;
+    drive = (value:Object|null): _AsPromiseBase => {
+        let promise: _AsPromiseBase | null = fnc(value);
 
          if(promise != null){
                 return promise.thenBase(drive);
          }else{
-                return new AsPromiseBase((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
+                return new _AsPromiseBase((resolve:(value:Object|null)=>void, reject:(reason:Object|null)=>void) => {
                      resolve(null);
                 });
          }
@@ -50,23 +50,23 @@ function api2(ms: i32): AsPromise<C4> {
 
 
 
-function main5():AsPromiseBase{
+function main5():_AsPromiseBase{
    
     let label:i32 = 0;
     let c4: C4;
 
-    function inner(value:Object|null): AsPromiseBase|null{
+    function inner(value:Object|null): _AsPromiseBase|null{
         switch(label){
             case 0:
                 c4 = new C4();
                 trace(`start`);
                 label = 1;
-                return (api1(1) as AsPromiseBase);
+                return (api1(1) as _AsPromiseBase);
             case 1:
                 const result = value as string;
                 trace(`continue: ${c4.a} ${result}`);
                 label = 2;
-                return (api2(2) as AsPromiseBase);
+                return (api2(2) as _AsPromiseBase);
             case 2:
                 const result2 = value as C4;
                 trace(`continue: ${c4.a} ${result2.a}`);
